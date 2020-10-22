@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -35,18 +34,10 @@ public class RepoController {
         final String url = "https://api.github.com/repos/" + owner + "/" + repositoryName;
         RepoDto repoDto = repoService.getRepoDto(url);
 
-        return new ResponseEntity<>(repoDto, HttpStatus.OK);
+        return new ResponseEntity<>(repoDto, HttpStatus.ACCEPTED);
     }
-
-    @GetMapping("/xd")
-    public ResponseEntity<String> getRepo2() throws JsonProcessingException {
-        return new ResponseEntity<>("Hello!", HttpStatus.OK);
-    }
-
-
 
     @ControllerAdvice
- //   @EnableWebMvc
     public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
         @ExceptionHandler(NotFoundException.class)
@@ -58,18 +49,12 @@ public class RepoController {
 
         @Override
         protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-            System.out.println(ex);
             String error = "Malformed JSON request";
             return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
         }
 
-
         private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
             return new ResponseEntity<>(apiError, apiError.getStatus());
         }
-
-
     }
-
-
 }

@@ -4,15 +4,10 @@ import com.example.gitapi.dto.RepoDto;
 import com.example.gitapi.exception.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -27,6 +22,7 @@ public class RepoService {
 
         Map<String, Object> jsonRepoMap = getMap(jsonRepo);
         LocalDateTime dateTime = formatLocalDateTime(jsonRepoMap);
+        //LocalDateTime dateTime = LocalDateTime.parse((String) jsonRepoMap.get("updated_at"));
 
         return new RepoDto(jsonRepoMap.get("name").toString(), (String) jsonRepoMap.get("description"), jsonRepoMap.get("clone_url").toString(),
                 Integer.parseInt(jsonRepoMap.get("stargazers_count").toString()), dateTime);
@@ -38,20 +34,17 @@ public class RepoService {
         try {
             jsonRepo = restTemplate.getForObject(url, String.class);
         } catch (HttpClientErrorException e) {
-            System.err.println("Repo does not exist");
             throw new NotFoundException("Error, such a repo does not exist!");
         }
         return jsonRepo;
     }
 
     public Map<String, Object> getMap(String jsonRepo) throws JsonProcessingException {
-        System.out.println("wchodze do get map");
         return new ObjectMapper().readValue(jsonRepo, HashMap.class);
     }
 
 
     public LocalDateTime formatLocalDateTime(Map<String, Object> jsonRepoMap) {
-        System.out.println("wchodze do fortmatLocalDate");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
         return LocalDateTime.parse((String) jsonRepoMap.get("updated_at"), formatter);
     }
