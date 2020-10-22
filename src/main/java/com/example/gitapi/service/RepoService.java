@@ -4,10 +4,15 @@ import com.example.gitapi.dto.RepoDto;
 import com.example.gitapi.exception.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -28,22 +33,16 @@ public class RepoService {
 
     }
 
-    public String getRepo(String url, RestTemplate restTemplate) {
+    public String getRepo(String url, RestTemplate restTemplate) throws HttpClientErrorException.BadRequest {
         String jsonRepo = "";
         try {
             jsonRepo = restTemplate.getForObject(url, String.class);
         } catch (HttpClientErrorException e) {
             System.err.println("Repo does not exist");
-            new NotFoundException("Repo not Found");
+            throw new NotFoundException("Error, such a repo does not exist!");
         }
         return jsonRepo;
     }
-
-//    public String getRepo(String url, RestTemplate restTemplate) {
-//        String jsonRepo =  restTemplate.getForObject(url, String.class);
-//
-//        return jsonRepo;
-//    }
 
     public Map<String, Object> getMap(String jsonRepo) throws JsonProcessingException {
         System.out.println("wchodze do get map");
