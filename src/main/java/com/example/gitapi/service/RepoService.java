@@ -1,11 +1,13 @@
 package com.example.gitapi.service;
 
 import com.example.gitapi.dto.RepoDto;
+import com.example.gitapi.exception.InternalServerError;
 import com.example.gitapi.exception.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -35,6 +37,8 @@ public class RepoService {
             jsonRepo = restTemplate.getForObject(url, String.class);
         } catch (HttpClientErrorException e) {
             throw new NotFoundException("Error, such a repo does not exist!");
+        } catch (HttpServerErrorException.InternalServerError e){
+            throw new InternalServerError("GitHub API internal server error!");
         }
         return jsonRepo;
     }

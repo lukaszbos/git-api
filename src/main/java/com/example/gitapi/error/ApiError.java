@@ -26,7 +26,7 @@ public class ApiError {
     public ApiError(HttpStatus status, Throwable ex) {
         this();
         this.status = status;
-        this.message = "Unexpected error";
+        this.message = ex.getMessage();
     }
 
     public ApiError(HttpStatus status, String message, Throwable ex) {

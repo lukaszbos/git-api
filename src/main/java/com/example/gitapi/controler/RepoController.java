@@ -3,6 +3,7 @@ package com.example.gitapi.controler;
 import com.example.gitapi.dto.RepoDto;
 import com.example.gitapi.error.ApiError;
 import com.example.gitapi.exception.NotFoundException;
+import com.example.gitapi.exception.RestExceptionHandler;
 import com.example.gitapi.service.RepoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,24 +38,4 @@ public class RepoController {
         return new ResponseEntity<>(repoDto, HttpStatus.ACCEPTED);
     }
 
-    @ControllerAdvice
-    public class RestExceptionHandler extends ResponseEntityExceptionHandler {
-
-        @ExceptionHandler(NotFoundException.class)
-        protected ResponseEntity<Object> handleEntityNotFound(NotFoundException ex) {
-            ApiError apiError = new ApiError(NOT_FOUND);
-            apiError.setMessage(ex.getMessage());
-            return buildResponseEntity(apiError);
-        }
-
-        @Override
-        protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-            String error = "Malformed JSON request";
-            return buildResponseEntity(new ApiError(HttpStatus.BAD_REQUEST, error, ex));
-        }
-
-        private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
-            return new ResponseEntity<>(apiError, apiError.getStatus());
-        }
-    }
 }
