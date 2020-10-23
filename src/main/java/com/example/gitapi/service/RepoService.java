@@ -3,6 +3,7 @@ package com.example.gitapi.service;
 import com.example.gitapi.dto.RepoDto;
 import com.example.gitapi.exception.InternalServerError;
 import com.example.gitapi.exception.NotFoundException;
+import com.example.gitapi.utils.DateFormatter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -11,9 +12,9 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+
 
 @Service
 public class RepoService {
@@ -23,15 +24,19 @@ public class RepoService {
         String jsonRepo = getRepo(url, restTemplate);
 
         Map<String, Object> jsonRepoMap = getMap(jsonRepo);
-        LocalDateTime dateTime = formatLocalDateTime(jsonRepoMap);
-        //LocalDateTime dateTime = LocalDateTime.parse((String) jsonRepoMap.get("updated_at"));
+        LocalDateTime dateTime = DateFormatter.formatLocalDateTime(jsonRepoMap);
 
-        return new RepoDto(jsonRepoMap.get("name").toString(), (String) jsonRepoMap.get("description"), jsonRepoMap.get("clone_url").toString(),
-                Integer.parseInt(jsonRepoMap.get("stargazers_count").toString()), dateTime);
+        return RepoDto.builder()
+                .name((String)jsonRepoMap.get("name"))
+                .description((String)jsonRepoMap.get("description"))
+                .gitCloneUrl((String)jsonRepoMap.get("clone_url"))
+                .stars(Integer.parseInt(jsonRepoMap.get("stargazers_count").toString()))
+                .createdAt(dateTime)
+                .build();
 
     }
 
-    public String getRepo(String url, RestTemplate restTemplate) throws HttpClientErrorException.BadRequest {
+    private String getRepo(String url, RestTemplate restTemplate) throws HttpClientErrorException.BadRequest {
         String jsonRepo = "";
         try {
             jsonRepo = restTemplate.getForObject(url, String.class);
@@ -43,13 +48,7 @@ public class RepoService {
         return jsonRepo;
     }
 
-    public Map<String, Object> getMap(String jsonRepo) throws JsonProcessingException {
+    Map<String, Object> getMap(String jsonRepo) throws JsonProcessingException {
         return new ObjectMapper().readValue(jsonRepo, HashMap.class);
-    }
-
-
-    public LocalDateTime formatLocalDateTime(Map<String, Object> jsonRepoMap) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        return LocalDateTime.parse((String) jsonRepoMap.get("updated_at"), formatter);
     }
 }
